@@ -72,6 +72,9 @@ public class Product {
             this.productOptions = new ArrayList<>();
         }
         this.productOptions.add(productOption);
+        
+        // productId를 직접 설정해줘야 함
+        productOption.setProductId(this.productId);
         productOption.setProduct(this);
     }
     
@@ -80,6 +83,8 @@ public class Product {
             this.productImages = new ArrayList<>();
         }
         this.productImages.add(productImg);
+        
+        // ProductImg는 관계 매핑만 있으므로 이대로 OK
         productImg.setProduct(this);
     }
     

@@ -48,6 +48,11 @@ public class ProductOption {
         this.optName = optName;
     }
     
+    // productId setter 추가 (Product에서 설정할 수 있도록)
+    public void setProductId(Integer productId) {
+        this.productId = productId;
+    }
+    
     // 업데이트 메서드
     public void updateOptionName(String optName) {
         this.optName = optName;

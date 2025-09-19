@@ -50,6 +50,7 @@ public class SecurityConfig {
                                 "/api/v1/notice/**",
                                 "/login/**",
                                 "/oauth2/**",
+                                "/api/v1/admin/**",
                                 //인증 없이 접근 불가지만 테스트를 위해 허용하는 경로
                                 "/api/auth/**",      // 추가
                                 "/auth/**",          // 추가
