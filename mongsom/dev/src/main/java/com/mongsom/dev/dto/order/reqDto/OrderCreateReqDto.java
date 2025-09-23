@@ -22,7 +22,7 @@ public class OrderCreateReqDto {
     
     // order_item 테이블 관련 필드
     @NotNull(message = "사용자 코드는 필수입니다")
-    private Integer userCode;
+    private Long userCode;
     
     @NotNull(message = "받는 사람 이름은 필수입니다")
     private String receivedUserName;

@@ -17,7 +17,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
     
     // 특정 사용자의 모든 주문 상세 조회
     @Query("SELECT od FROM OrderDetail od WHERE od.userCode = :userCode ORDER BY od.createdAt DESC")
-    List<OrderDetail> findByUserCodeOrderByCreatedAtDesc(@Param("userCode") Integer userCode);
+    List<OrderDetail> findByUserCodeOrderByCreatedAtDesc(@Param("userCode") Long userCode);
     
     // 리뷰 작성 가능한 주문 상세 조회 (배송완료 + 리뷰 미작성) - 네이티브 쿼리로 변경
     @Query(value = "SELECT od.* FROM order_detail od " +
@@ -26,7 +26,7 @@ public interface OrderDetailRepository extends JpaRepository<OrderDetail, Intege
            "AND oi.delivery_status = '배송완료' " +
            "AND od.review_status = 0 " +
            "ORDER BY od.created_at DESC", nativeQuery = true)
-    List<OrderDetail> findReviewableOrderDetails(@Param("userCode") Integer userCode);
+    List<OrderDetail> findReviewableOrderDetails(@Param("userCode") Long userCode);
     
     // 네이티브 쿼리만 사용 - JPA 연관관계 무시
     @Query(value = "SELECT order_detail_id, order_id, user_code, opt_id, product_id, quantity, price, review_status, order_status, created_at, updated_at " +
@@ -59,7 +59,7 @@ List<Object[]> findOrderDetailItemsByOrderId(@Param("orderId") Integer orderId);
                    "AND od.review_status = 0 " +
                    "ORDER BY oi.payment_at DESC " +
                    "LIMIT :limit OFFSET :offset", nativeQuery = true)
-    List<Object[]> findReviewableProducts(@Param("userCode") Integer userCode, 
+    List<Object[]> findReviewableProducts(@Param("userCode") Long userCode, 
                                          @Param("limit") Integer limit, 
                                          @Param("offset") Integer offset);
     
@@ -70,7 +70,7 @@ List<Object[]> findOrderDetailItemsByOrderId(@Param("orderId") Integer orderId);
                    "WHERE od.user_code = :userCode " +
                    //"AND oi.delivery_status = '배송완료' " +
                    "AND od.review_status = 0", nativeQuery = true)
-    Integer countReviewableProducts(@Param("userCode") Integer userCode);
+    Integer countReviewableProducts(@Param("userCode") Long userCode);
     
     // 작성한 리뷰 조회 (페이징) - review_status = 1인 항목만
     @Query(value = "SELECT od.order_detail_id, od.opt_id, od.product_id, od.review_status, " +
@@ -84,7 +84,7 @@ List<Object[]> findOrderDetailItemsByOrderId(@Param("orderId") Integer orderId);
                    "AND od.review_status = 1 " +
                    "ORDER BY ur.review_id DESC " +
                    "LIMIT :limit OFFSET :offset", nativeQuery = true)
-    List<Object[]> findWrittenReviews(@Param("userCode") Integer userCode, 
+    List<Object[]> findWrittenReviews(@Param("userCode") Long userCode, 
                                      @Param("limit") Integer limit, 
                                      @Param("offset") Integer offset);
     
@@ -94,7 +94,7 @@ List<Object[]> findOrderDetailItemsByOrderId(@Param("orderId") Integer orderId);
                    "JOIN user_review ur ON od.user_code = ur.user_code AND od.order_detail_id = ur.order_detail_id " +
                    "WHERE od.user_code = :userCode " +
                    "AND od.review_status = 1", nativeQuery = true)
-    Integer countWrittenReviews(@Param("userCode") Integer userCode);
+    Integer countWrittenReviews(@Param("userCode") Long userCode);
     
     // order_detail의 review_status 업데이트
     @Modifying
@@ -105,5 +105,8 @@ List<Object[]> findOrderDetailItemsByOrderId(@Param("orderId") Integer orderId);
     @Modifying
     @Query("UPDATE OrderDetail od SET od.reviewStatus = 1 WHERE od.orderDetailId = :orderDetailId")
     int updateReviewStatusToZero(@Param("orderDetailId") Integer orderDetailId);
+    
+    // 관리자 주문 조회용 - orderId로 주문 상세 목록 조회
+    List<OrderDetail> findByOrderId(Integer orderId);
     
 }

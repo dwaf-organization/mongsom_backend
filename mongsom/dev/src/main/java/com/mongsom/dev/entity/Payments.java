@@ -38,7 +38,7 @@ public class Payments {
     private Integer orderId;
     
     @Column(name = "user_code", nullable = false)
-    private Integer userCode;
+    private Long userCode;
     
     @Column(name = "payment_method", nullable = false)
     private String paymentMethod;  // 신용카드, 계좌이체, 카카오페이, 토스페이 등

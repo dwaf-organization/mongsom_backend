@@ -38,7 +38,7 @@ public class OrderDetail {
     private Integer orderId;
     
     @Column(name = "user_code", nullable = false)
-    private Integer userCode;
+    private Long userCode;
     
     @Column(name = "opt_id", nullable = false)
     private Integer optId;

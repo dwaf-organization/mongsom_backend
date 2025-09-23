@@ -21,9 +21,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     // 상품명 중복 체크
     boolean existsByName(String name);
     
-    // 프리미엄 상품만 조회 (페이징)
-    Page<Product> findByPremium(Integer premium, Pageable pageable);
-    
     // 프리미엄 상품만 조회 (리스트)
     List<Product> findByPremium(Integer premium);
     
@@ -42,10 +39,6 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     // 상품명으로 검색 (LIKE 검색)
     @Query("SELECT p FROM Product p WHERE p.name LIKE %:keyword%")
     List<Product> findByNameContaining(@Param("keyword") String keyword);
-    
-    // 상품명으로 검색 (페이징 지원)
-    @Query("SELECT p FROM Product p WHERE p.name LIKE %:keyword%")
-    Page<Product> findByNameContaining(@Param("keyword") String keyword, Pageable pageable);
     
     // 생성일 기준 최신 상품 조회
     @Query("SELECT p FROM Product p ORDER BY p.createdAt DESC")
@@ -78,4 +71,16 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     // 기본 상품 조회
     @Query("SELECT p FROM Product p WHERE p.productId = :productId")
     Optional<Product> findByIdWithoutFetch(@Param("productId") Integer productId);
+    
+    
+    //관리자페이지
+    
+    // 상품명으로 검색 (LIKE %name%)
+    Page<Product> findByNameContaining(String name, Pageable pageable);
+    
+    // 프리미엄 여부로 검색
+    Page<Product> findByPremium(Integer premium, Pageable pageable);
+    
+    // 상품명 + 프리미엄 조건 모두 적용
+    Page<Product> findByNameContainingAndPremium(String name, Integer premium, Pageable pageable);
 }

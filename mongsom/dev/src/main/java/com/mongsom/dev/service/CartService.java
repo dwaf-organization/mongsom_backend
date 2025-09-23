@@ -41,7 +41,7 @@ public class CartService {
     
     //장바구니조회
     @Transactional(readOnly = true)
-    public RespDto<CartRespDto> getCartItems(Integer userCode) {
+    public RespDto<CartRespDto> getCartItems(Long userCode) {
         try {
             // 사용자의 장바구니 조회 (상품, 옵션 정보 포함)
             List<Cart> cartItems = cartRepository.findByUserCodeWithProductAndOption(userCode);
@@ -177,7 +177,7 @@ public class CartService {
     }
     //장바구니상품삭제
     @Transactional
-    public RespDto<String> deleteCartItem(Integer userCode, Integer productId, Integer optId) {
+    public RespDto<String> deleteCartItem(Long userCode, Integer productId, Integer optId) {
         try {
             // 1. 사용자 존재 확인
             Optional<User> userOpt = userRepository.findUserByUserCode(userCode);

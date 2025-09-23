@@ -16,7 +16,7 @@ import lombok.Setter;
 public class CartAddReqDto {
     
     @NotNull(message = "사용자 코드는 필수입니다")
-    private Integer userCode;
+    private Long userCode;
     
     private Integer optId;
     

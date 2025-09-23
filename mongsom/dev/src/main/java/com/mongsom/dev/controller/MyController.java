@@ -41,7 +41,7 @@ public class MyController {
     
     @GetMapping("/delivery/number/{userCode}")
     public ResponseEntity<RespDto<DeliveryStatusRespDto>> getDeliveryStatusCount(
-            @PathVariable("userCode") Integer userCode) {
+            @PathVariable("userCode") Long userCode) {
         
         log.info("배송 현황 개수 조회 요청 - userCode: {}", userCode);
         
@@ -52,7 +52,7 @@ public class MyController {
     
     @GetMapping("/order/{userCode}")
     public ResponseEntity<RespDto<List<MyOrderRespDto>>> getMyOrders(
-            @PathVariable("userCode") Integer userCode) {
+            @PathVariable("userCode") Long userCode) {
         
         log.info("주문내역 조회 요청 - userCode: {}", userCode);
         
@@ -74,7 +74,7 @@ public class MyController {
     // 작성가능한 리뷰 조회
     @GetMapping("/review/{userCode}/{page}/{size}")
     public ResponseEntity<RespDto<MyReviewRespDto>> getReviewableProducts(
-            @PathVariable("userCode") Integer userCode,
+            @PathVariable("userCode") Long userCode,
             @PathVariable("page") Integer page,
             @PathVariable("size") Integer size) {
         
@@ -88,7 +88,7 @@ public class MyController {
     // 작성한 리뷰 조회
     @GetMapping("/review/write/{userCode}/{page}/{size}")
     public ResponseEntity<RespDto<WrittenReviewRespDto>> getWrittenReviews(
-            @PathVariable("userCode") Integer userCode,
+            @PathVariable("userCode") Long userCode,
             @PathVariable("page") Integer page,
             @PathVariable("size") Integer size) {
         
@@ -126,7 +126,7 @@ public class MyController {
     @DeleteMapping("/review/delete/{reviewId}")
     public ResponseEntity<RespDto<Boolean>> deleteReview(
             @PathVariable("reviewId") Integer reviewId,
-            @RequestParam("userCode") Integer userCode) {  // 쿼리 파라미터로 userCode 받기
+            @RequestParam("userCode") Long userCode) {  // 쿼리 파라미터로 userCode 받기
         
         log.info("리뷰 삭제 요청 - reviewId: {}, userCode: {}", reviewId, userCode);
         
@@ -150,8 +150,8 @@ public class MyController {
     public ResponseEntity<RespDto<String>> createChangeRequest(@Valid @RequestBody ChangeCreateReqDto reqDto) {
         
         String changeType = (reqDto.getChangeStatus() == 1) ? "교환" : "반품";
-        log.info("{} 신청 요청 - orderItemId: {}, orderId: {}, userCode: {}", 
-                changeType, reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode());
+        log.info("{} 신청 요청 - orderDetailId: {}, orderId: {}, userCode: {}", 
+                changeType, reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode());
         
         RespDto<String> response = myService.createChangeRequest(reqDto);
         
@@ -167,7 +167,7 @@ public class MyController {
     public ResponseEntity<RespDto<String>> deleteChangeRequest(@Valid @RequestBody ChangeDeleteReqDto reqDto) {
         
         log.info("교환/반품 신청 취소 요청 - orderItemId: {}, orderId: {}, userCode: {}", 
-                reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode());
+                reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode());
         
         RespDto<String> response = myService.deleteChangeRequest(reqDto);
         

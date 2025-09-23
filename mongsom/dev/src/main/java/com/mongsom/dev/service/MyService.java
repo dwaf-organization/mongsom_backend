@@ -59,7 +59,7 @@ public class MyService {
     private final ChangeItemRepository changeItemRepository;
     
     // 배송 현황 개수 조회 (3개월 이내)
-    public RespDto<DeliveryStatusRespDto> getDeliveryStatusCount(Integer userCode) {
+    public RespDto<DeliveryStatusRespDto> getDeliveryStatusCount(Long userCode) {
         try {
             Integer paymentCompleted = 0;
             Integer preparing = 0;
@@ -119,7 +119,7 @@ public class MyService {
     }
     
     // 주문내역 조회 - Object[] 방식으로 수정
-    public RespDto<List<MyOrderRespDto>> getMyOrders(Integer userCode) {
+    public RespDto<List<MyOrderRespDto>> getMyOrders(Long userCode) {
         try {
             log.info("=== 주문내역 조회 시작 - userCode: {} ===", userCode);
             
@@ -289,7 +289,7 @@ public class MyService {
                 .paymentAt(orderItem.getPaymentAt())
                 .deliveryStatus(orderItem.getDeliveryStatus())
                 .finalPrice(orderItem.getFinalPrice())
-                .userCode(orderItem.getUserCode())
+                .userCode(orderItem.getUserCode().longValue())
                 .receivedUserName(orderItem.getReceivedUserName())
                 .receivedUserPhone(orderItem.getReceivedUserPhone())
                 .receivedUserZipCode(orderItem.getReceivedUserZipCode())
@@ -370,7 +370,7 @@ public class MyService {
     }
     
     // 리뷰 작성 가능 상품 조회
-	public RespDto<MyReviewRespDto> getReviewableProducts(Integer userCode, Integer page, Integer size) {
+	public RespDto<MyReviewRespDto> getReviewableProducts(Long userCode, Integer page, Integer size) {
 	    try {
 	        log.info("=== 리뷰 작성 가능 상품 조회 시작 - userCode: {}, page: {}, size: {} ===", userCode, page, size);
 	        
@@ -457,7 +457,7 @@ public class MyService {
 	/**
 	 * 작성한 리뷰 조회
 	 */
-	public RespDto<WrittenReviewRespDto> getWrittenReviews(Integer userCode, Integer page, Integer size) {
+	public RespDto<WrittenReviewRespDto> getWrittenReviews(Long userCode, Integer page, Integer size) {
 	    try {
 	        log.info("=== 작성한 리뷰 조회 시작 - userCode: {}, page: {}, size: {} ===", userCode, page, size);
 	        
@@ -747,7 +747,7 @@ public class MyService {
 	
 	// 리뷰 삭제
 	@Transactional
-	public RespDto<Boolean> deleteReview(Integer reviewId, Integer userCode) {
+	public RespDto<Boolean> deleteReview(Integer reviewId, Long userCode) {
 	    try {
 	        log.info("=== 리뷰 삭제 시작 - reviewId: {}, userCode: {} ===", reviewId, userCode);
 	        
@@ -868,12 +868,12 @@ public class MyService {
 	public RespDto<String> createChangeRequest(ChangeCreateReqDto reqDto) {
 	    try {
 	        log.info("=== 교환/반품 신청 시작 - orderItemId: {}, orderId: {}, userCode: {}, changeStatus: {} ===", 
-	                reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode(), reqDto.getChangeStatus());
+	                reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode(), reqDto.getChangeStatus());
 	        
 	        // 1. 주문 상품 존재 여부 확인 (order_detail 테이블에서)
-	        Optional<OrderDetail> orderDetailOpt = orderDetailRepository.findById(reqDto.getOrderItemId());
+	        Optional<OrderDetail> orderDetailOpt = orderDetailRepository.findById(reqDto.getOrderDetailId());
 	        if (orderDetailOpt.isEmpty()) {
-	            log.error("주문 상품을 찾을 수 없습니다 - orderItemId: {}", reqDto.getOrderItemId());
+	            log.error("주문 상품을 찾을 수 없습니다 - orderItemId: {}", reqDto.getOrderDetailId());
 	            return RespDto.<String>builder()
 	                    .code(-1)
 	                    .data("주문 상품을 찾을 수 없습니다.")
@@ -904,7 +904,7 @@ public class MyService {
 	        
 	        // 4. ChangeItem 엔티티 생성 및 저장
 	        ChangeItem changeItem = ChangeItem.builder()
-	                .orderItemId(reqDto.getOrderItemId())
+	                .orderDetailId(reqDto.getOrderDetailId())
 	                .orderId(reqDto.getOrderId())
 	                .userCode(reqDto.getUserCode())
 	                .changeStatus(reqDto.getChangeStatus())
@@ -918,7 +918,7 @@ public class MyService {
 	        String changeTypeStr = (reqDto.getChangeStatus() == ChangeItem.ChangeStatus.EXCHANGE) ? "교환" : "반품";
 	        
 	        log.info("=== {}신청 완료 - changeId: {}, orderItemId: {} ===", 
-	                changeTypeStr, savedChangeItem.getChangeId(), reqDto.getOrderItemId());
+	                changeTypeStr, savedChangeItem.getChangeId(), reqDto.getOrderDetailId());
 	        
 	        return RespDto.<String>builder()
 	                .code(1)
@@ -927,7 +927,7 @@ public class MyService {
 	                
 	    } catch (Exception e) {
 	        log.error("교환/반품 신청 실패 - orderItemId: {}, userCode: {}, error: {}", 
-	                reqDto.getOrderItemId(), reqDto.getUserCode(), e.getMessage());
+	                reqDto.getOrderDetailId(), reqDto.getUserCode(), e.getMessage());
 	        return RespDto.<String>builder()
 	                .code(-1)
 	                .data("교환/반품 신청 중 오류가 발생했습니다.")
@@ -942,15 +942,15 @@ public class MyService {
 	public RespDto<String> deleteChangeRequest(ChangeDeleteReqDto reqDto) {
 	    try {
 	        log.info("=== 교환/반품 신청 취소 시작 - orderItemId: {}, orderId: {}, userCode: {} ===", 
-	                reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode());
+	                reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode());
 	        
 	        // 1. 삭제할 교환/반품 신청 조회
 	        List<ChangeItem> changeItems = changeItemRepository.findByOrderItemIdAndOrderIdAndUserCode(
-	                reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode());
+	                reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode());
 	        
 	        if (changeItems.isEmpty()) {
 	            log.error("교환/반품 신청 내역을 찾을 수 없습니다 - orderItemId: {}, orderId: {}, userCode: {}", 
-	                    reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode());
+	                    reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode());
 	            return RespDto.<String>builder()
 	                    .code(-1)
 	                    .data("교환/반품 신청 내역을 찾을 수 없습니다.")
@@ -970,11 +970,11 @@ public class MyService {
 	        
 	        // 3. 교환/반품 신청 삭제
 	        int deletedCount = changeItemRepository.deleteByOrderItemIdAndOrderIdAndUserCode(
-	                reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode());
+	                reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode());
 	        
 	        if (deletedCount > 0) {
 	            log.info("교환/반품 신청 취소 완료 - 삭제된 건수: {}, orderItemId: {}, orderId: {}, userCode: {}", 
-	                    deletedCount, reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode());
+	                    deletedCount, reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode());
 	            
 	            return RespDto.<String>builder()
 	                    .code(1)
@@ -982,7 +982,7 @@ public class MyService {
 	                    .build();
 	        } else {
 	            log.error("교환/반품 신청 삭제 실패 - orderItemId: {}, orderId: {}, userCode: {}", 
-	                    reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode());
+	                    reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode());
 	            return RespDto.<String>builder()
 	                    .code(-1)
 	                    .data("교환/반품 신청 취소에 실패했습니다.")
@@ -991,7 +991,7 @@ public class MyService {
 	        
 	    } catch (Exception e) {
 	        log.error("교환/반품 신청 취소 실패 - orderItemId: {}, orderId: {}, userCode: {}, error: {}", 
-	                reqDto.getOrderItemId(), reqDto.getOrderId(), reqDto.getUserCode(), e.getMessage());
+	                reqDto.getOrderDetailId(), reqDto.getOrderId(), reqDto.getUserCode(), e.getMessage());
 	        return RespDto.<String>builder()
 	                .code(-1)
 	                .data("교환/반품 신청 취소 중 오류가 발생했습니다.")

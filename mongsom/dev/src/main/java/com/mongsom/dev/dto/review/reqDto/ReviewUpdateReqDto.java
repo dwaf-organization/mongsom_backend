@@ -21,7 +21,7 @@ public class ReviewUpdateReqDto {
     private Integer reviewId;
     
     @NotNull(message = "사용자 코드는 필수입니다.")
-    private Integer userCode;
+    private Long userCode;
     
     @NotNull(message = "리뷰 평점은 필수입니다.")
     @Min(value = 1, message = "리뷰 평점은 1점 이상이어야 합니다.")

@@ -32,4 +32,7 @@ public interface ProductOptionRepository extends JpaRepository<ProductOption, In
     // 디버깅용: 특정 opt_id 존재 확인
     @Query(value = "SELECT COUNT(*) FROM product_option WHERE opt_id = :optId", nativeQuery = true)
     Integer countByOptId(@Param("optId") Integer optId);
+    
+    // 관리자 상품 조회용 - productId로 옵션 목록 조회
+    List<ProductOption> findByProductId(Integer productId);
 }

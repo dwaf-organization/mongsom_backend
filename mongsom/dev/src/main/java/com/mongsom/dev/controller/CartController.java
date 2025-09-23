@@ -34,7 +34,7 @@ public class CartController {
     //장바구니조회
     @GetMapping("/{userCode}")
     public ResponseEntity<RespDto<CartRespDto>> getCartItems(
-            @PathVariable("userCode") Integer userCode) {
+            @PathVariable("userCode") Long userCode) {
         RespDto<CartRespDto> response = cartService.getCartItems(userCode);
         HttpStatus status = response.getCode() == 1 ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return ResponseEntity.status(status).body(response);
@@ -50,7 +50,7 @@ public class CartController {
     //장바구니상품삭제
     @DeleteMapping("/delete/{userCode}/{productId}/{optId}")
     public ResponseEntity<RespDto<String>> deleteCartItem(
-            @PathVariable("userCode") Integer userCode,
+            @PathVariable("userCode") Long userCode,
             @PathVariable("productId") Integer productId,
             @PathVariable("optId") Integer optId) {
         RespDto<String> response = cartService.deleteCartItem(userCode, productId, optId);

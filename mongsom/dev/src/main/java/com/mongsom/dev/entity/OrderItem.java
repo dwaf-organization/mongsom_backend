@@ -1,12 +1,9 @@
 package com.mongsom.dev.entity;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -39,7 +36,7 @@ public class OrderItem {
     private Integer orderId;
     
     @Column(name = "user_code", nullable = false)
-    private Integer userCode;
+    private Long userCode;
     
     @Column(name = "received_user_name", nullable = false)
     private String receivedUserName;
@@ -86,6 +83,10 @@ public class OrderItem {
     
     @Column(name = "change_state")
     private Integer changeState;
+    
+    @Column(name = "approval_change_status")
+    @Builder.Default
+    private Integer approvalChangeStatus = 0;  // 0=승인대기, 1=승인, 2=반려
     
     @CreationTimestamp
     @Column(name = "created_at")

@@ -29,14 +29,14 @@ public class ChangeItem {
     @Column(name = "change_id")
     private Integer changeId;
     
-    @Column(name = "order_item_id", nullable = false)
-    private Integer orderItemId;
+    @Column(name = "order_detail_id")  // 이 부분이 중요!
+    private Integer orderDetailId;
     
     @Column(name = "order_id", nullable = false)
     private Integer orderId;
     
     @Column(name = "user_code", nullable = false)
-    private Integer userCode;
+    private Long userCode;
     
     @Column(name = "change_status", columnDefinition = "int(11) DEFAULT 0")
     private Integer changeStatus = 0; // 0=주문, 1=교환, 2=반품

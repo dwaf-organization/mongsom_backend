@@ -15,7 +15,7 @@ import lombok.NoArgsConstructor;
 public class CartAllCheckReqDto {
     
     @NotNull(message = "사용자 코드는 필수입니다.")
-    private Integer userCode;
+    private Long userCode;
     
     @NotNull(message = "전체 체크 상태는 필수입니다.")
     @Min(value = 0, message = "체크 상태는 0(해제) 또는 1(선택)이어야 합니다.")

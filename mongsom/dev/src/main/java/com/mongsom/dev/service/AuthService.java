@@ -135,7 +135,7 @@ public class AuthService {
     }
     
     //유저정보 가져오기
-    public RespDto<UserInfoRespDto> getUserInfo(Integer userCode) {
+    public RespDto<UserInfoRespDto> getUserInfo(Long userCode) {
         try {
             Optional<User> userOptional = userRepository.findUserByUserCode(userCode);
             
@@ -164,7 +164,7 @@ public class AuthService {
     
     //회원탈퇴
     @Transactional
-    public RespDto<String> deleteUser(Integer userCode) {
+    public RespDto<String> deleteUser(Long userCode) {
         try {
             Optional<User> userOptional = userRepository.findUserByUserCode(userCode);
             

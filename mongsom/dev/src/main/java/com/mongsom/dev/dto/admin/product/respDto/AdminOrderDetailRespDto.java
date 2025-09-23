@@ -1,8 +1,7 @@
-package com.mongsom.dev.dto.mypage.respDto;
+package com.mongsom.dev.dto.admin.product.respDto;
 
 import java.time.LocalDateTime;
 import java.util.List;
-
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -12,15 +11,13 @@ import lombok.NoArgsConstructor;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class MyOrderDetailRespDto {
+public class AdminOrderDetailRespDto {
     
-    // 기본 주문 정보 (기존과 동일)
+    // 주문 기본 정보
     private Integer orderId;
     private LocalDateTime paymentAt;
     private String deliveryStatus;
     private Integer finalPrice;
-    
-    // 추가 주문 정보 (order_item에서)
     private Long userCode;
     private String receivedUserName;
     private String receivedUserPhone;
@@ -30,29 +27,33 @@ public class MyOrderDetailRespDto {
     private String message;
     private Integer changeState;
     
-    // 결제 정보 (payments에서)
+    // 배송 정보 추가
+    private String deliveryCom;
+    private String invoiceNum;
+    
+    // 결제 정보
     private String paymentMethod;
     private Integer paymentAmount;
     private String paymentStatus;
     private String pgProvider;
     
-    // 주문 상품 상세 목록 (기존과 동일하지만 추가 필드들 포함)
-    private List<MyOrderDetailItemDto> details;
+    // 주문 상세 목록
+    private List<OrderDetailDto> details;
     
     @Data
     @Builder
     @NoArgsConstructor
     @AllArgsConstructor
-    public static class MyOrderDetailItemDto {
-    	private Integer orderDetailId;
+    public static class OrderDetailDto {
+        private Integer orderDetailId;
         private Integer productId;
         private String productName;
         private Integer optId;
         private String optName;
-        private Integer changeStatus;
+        private Integer changeStatus;    // change_item 테이블의 change_status
         private List<String> productImgUrls;
-        private Integer quantity;    // order_detail에서 추가
-        private Integer price;       // order_detail에서 추가  
-        private Integer orderStatus; // order_detail에서 추가
+        private Integer quantity;
+        private Integer price;
+        private Integer orderStatus;     // order_detail 테이블의 order_status
     }
 }

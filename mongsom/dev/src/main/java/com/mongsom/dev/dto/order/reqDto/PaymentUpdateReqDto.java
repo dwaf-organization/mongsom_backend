@@ -17,7 +17,7 @@ public class PaymentUpdateReqDto {
     private Integer orderId;
     
     @NotNull(message = "사용자 코드는 필수입니다.")
-    private Integer userCode;
+    private Long userCode;
     
     @NotBlank(message = "결제 수단은 필수입니다.")
     private String paymentMethod;

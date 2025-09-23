@@ -55,14 +55,14 @@ public class AuthController {
     }
     //유저정보조회
     @GetMapping("/{userCode}")
-    public ResponseEntity<RespDto<UserInfoRespDto>> getUserInfo(@PathVariable("userCode") Integer userCode) {
+    public ResponseEntity<RespDto<UserInfoRespDto>> getUserInfo(@PathVariable("userCode") Long userCode) {
         RespDto<UserInfoRespDto> response = authService.getUserInfo(userCode);
         HttpStatus status = response.getCode() == 1 ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return ResponseEntity.status(status).body(response);
     }
     //회원탈퇴
     @PostMapping("/delete/{userCode}")
-    public ResponseEntity<RespDto<String>> deleteUser(@PathVariable("userCode") Integer userCode) {
+    public ResponseEntity<RespDto<String>> deleteUser(@PathVariable("userCode") Long userCode) {
         RespDto<String> response = authService.deleteUser(userCode);
         HttpStatus status = response.getCode() == 1 ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         return ResponseEntity.status(status).body(response);

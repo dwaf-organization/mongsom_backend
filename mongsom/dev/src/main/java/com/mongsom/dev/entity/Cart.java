@@ -35,7 +35,7 @@ public class Cart {
     private Integer cartId;
     
     @Column(name = "user_code", nullable = false)
-    private Integer userCode;
+    private Long userCode;
     
     @Column(name = "opt_id")
     private Integer optId;

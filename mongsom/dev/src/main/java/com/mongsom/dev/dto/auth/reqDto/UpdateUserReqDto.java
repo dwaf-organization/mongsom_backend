@@ -11,7 +11,7 @@ import lombok.NoArgsConstructor;
 public class UpdateUserReqDto {
     
     @NotNull(message = "사용자 코드는 필수 값입니다.")
-    private Integer userCode;
+    private Long userCode;
     
     private String password;
     

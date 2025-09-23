@@ -34,7 +34,7 @@ public class UserReview {
     private Integer reviewId;
     
     @Column(name = "user_code", nullable = false)
-    private Integer userCode;
+    private Long userCode;
     
     @Column(name = "order_detail_id", nullable = false)
     private Integer orderDetailId;
@@ -71,7 +71,7 @@ public class UserReview {
     
     // Builder 패턴을 위한 생성자
     @Builder
-    public UserReview(Integer userCode, Integer orderDetailId, Integer productId, Integer orderId,
+    public UserReview(Long userCode, Integer orderDetailId, Integer productId, Integer orderId,
                      Integer reviewRating, String reviewContent, LocalDateTime createdAt, LocalDateTime updatedAt) {
         this.userCode = userCode;
         this.orderDetailId = orderDetailId;

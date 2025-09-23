@@ -15,7 +15,7 @@ import com.mongsom.dev.entity.Payments;
 public interface PaymentsRepository extends JpaRepository<Payments, Integer> {
     
     // 주문 ID와 사용자 코드로 결제 정보 조회
-    Optional<Payments> findByOrderIdAndUserCode(Integer orderId, Integer userCode);
+    Optional<Payments> findByOrderIdAndUserCode(Integer orderId, Long userCode);
     
     // 특정 주문의 결제 정보 조회
     @Query("SELECT p FROM Payments p WHERE p.orderId = :orderId")
@@ -23,7 +23,7 @@ public interface PaymentsRepository extends JpaRepository<Payments, Integer> {
     
     // 특정 사용자의 결제 내역 조회
     @Query("SELECT p FROM Payments p WHERE p.userCode = :userCode ORDER BY p.createdAt DESC")
-    List<Payments> findByUserCodeOrderByCreatedAtDesc(@Param("userCode") Integer userCode);
+    List<Payments> findByUserCodeOrderByCreatedAtDesc(@Param("userCode") Long userCode);
     
     // 결제 상태별 조회
     @Query("SELECT p FROM Payments p WHERE p.paymentStatus = :paymentStatus ORDER BY p.createdAt DESC")
@@ -54,9 +54,10 @@ public interface PaymentsRepository extends JpaRepository<Payments, Integer> {
            "p.pgProvider = :pgProvider " +
            "WHERE p.orderId = :orderId AND p.userCode = :userCode")
     int updatePaymentInfo(@Param("orderId") Integer orderId,
-                         @Param("userCode") Integer userCode,
+                         @Param("userCode") Long userCode,
                          @Param("paymentMethod") String paymentMethod,
                          @Param("paymentStatus") String paymentStatus,
                          @Param("paymentKey") String paymentKey,
                          @Param("pgProvider") String pgProvider);
+
 }
