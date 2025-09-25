@@ -19,7 +19,7 @@ public interface ChangeItemRepository extends JpaRepository<ChangeItem, Integer>
     // orderItemId, orderId, userCode로 교환/반품 항목 조회
     @Query("SELECT ci FROM ChangeItem ci WHERE ci.orderDetailId = :orderDetailId AND ci.orderId = :orderId AND ci.userCode = :userCode")
     List<ChangeItem> findByOrderItemIdAndOrderIdAndUserCode(
-            @Param("orderItemId") Integer orderDetailId, 
+            @Param("orderDetailId") Integer orderDetailId, 
             @Param("orderId") Integer orderId, 
             @Param("userCode") Long userCode);
     
@@ -27,7 +27,7 @@ public interface ChangeItemRepository extends JpaRepository<ChangeItem, Integer>
     @Modifying
     @Query("DELETE FROM ChangeItem ci WHERE ci.orderDetailId = :orderDetailId AND ci.orderId = :orderId AND ci.userCode = :userCode")
     int deleteByOrderItemIdAndOrderIdAndUserCode(
-            @Param("orderItemId") Integer orderDetailId, 
+            @Param("orderDetailId") Integer orderDetailId, 
             @Param("orderId") Integer orderId, 
             @Param("userCode") Long userCode);
     

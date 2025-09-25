@@ -80,7 +80,7 @@ public class OrderService {
                     .deliveryPrice(reqDto.getDeliveryPrice())
                     .totalDiscountPrice(reqDto.getTotalDiscountPrice())
                     .finalPrice(reqDto.getFinalPrice())
-                    .deliveryStatus("결제대기")  // 고정값
+                    .deliveryStatus("결제완료")  // 고정값
                     .paymentAt(reqDto.getPaymentAt() != null ? reqDto.getPaymentAt() : LocalDateTime.now())
                     .changeState(0)  // 기본값: 주문
                     .build();
@@ -289,15 +289,6 @@ public class OrderService {
                     reqDto.getPaymentKey(),
                     reqDto.getPgProvider()
             );
-            
-            // 4-1. 결제 완료 시 주문 상태 업데이트
-            if ("COMPLETED".equals(reqDto.getPaymentStatus()) && updatedRows > 0) {
-                int orderUpdatedRows = orderItemRepository.updateDeliveryStatus(
-                    reqDto.getOrderId(), "결제완료");
-                
-                log.info("주문 상태 업데이트 완료 - orderId: {}, deliveryStatus: 결제완료, 업데이트된 행: {}", 
-                    reqDto.getOrderId(), orderUpdatedRows);
-            }
             
             // 5. 결제 완료 시 장바구니 삭제
             if ("COMPLETED".equals(reqDto.getPaymentStatus())) {

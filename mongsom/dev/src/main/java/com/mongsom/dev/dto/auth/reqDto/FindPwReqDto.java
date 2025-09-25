@@ -15,6 +15,9 @@ public class FindPwReqDto {
     @NotBlank(message = "이름은 필수 입력 값입니다.")
     private String name;
     
+    @NotBlank(message = "휴대전화는 필수 입력 값입니다.")
+    private String phone;
+    
     @NotBlank(message = "이메일은 필수 입력 값입니다.")
     @Email(message = "올바른 이메일 형식이 아닙니다.")
     private String email;

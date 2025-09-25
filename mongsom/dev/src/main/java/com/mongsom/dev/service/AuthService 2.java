@@ -1,10 +1,7 @@
 package com.mongsom.dev.service;
 
 import java.util.Optional;
-import java.util.Random;
 
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -35,7 +32,6 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     private final CartRepository cartRepository;
-    private final JavaMailSender mailSender;
     
     // 회원가입
     @Transactional
@@ -139,7 +135,7 @@ public class AuthService {
     }
     
     //유저정보 가져오기
-    public RespDto<UserInfoRespDto> getUserInfo(Long userCode) {
+    public RespDto<UserInfoRespDto> getUserInfo(Integer userCode) {
         try {
             Optional<User> userOptional = userRepository.findUserByUserCode(userCode);
             
@@ -168,7 +164,7 @@ public class AuthService {
     
     //회원탈퇴
     @Transactional
-    public RespDto<String> deleteUser(Long userCode) {
+    public RespDto<String> deleteUser(Integer userCode) {
         try {
             Optional<User> userOptional = userRepository.findUserByUserCode(userCode);
             
@@ -248,15 +244,15 @@ public class AuthService {
     }
     //비밀번호찾기
     @Transactional
-    public RespDto<String> findPassword(FindPwReqDto reqDto) {
+    public RespDto<Boolean> findPassword(FindPwReqDto reqDto) {
         try {
-            Optional<User> userOptional = userRepository.findByUserIdAndNameAndPhone(
-                    reqDto.getUserId(), reqDto.getName(), reqDto.getPhone());
+            Optional<User> userOptional = userRepository.findByUserIdAndNameAndEmail(
+                    reqDto.getUserId(), reqDto.getName(), reqDto.getEmail());
             
             if (userOptional.isEmpty()) {
-                return RespDto.<String>builder()
+                return RespDto.<Boolean>builder()
                         .code(-1)
-                        .data("사용자가 일치하지않습니다.")
+                        .data(false)
                         .build();
             }
             
@@ -264,70 +260,22 @@ public class AuthService {
             
             // 탈퇴한 사용자인지 확인
             if (user.getStatus() == Status.INACTIVE) {
-                return RespDto.<String>builder()
+                return RespDto.<Boolean>builder()
                         .code(-1)
-                        .data("이미 탈퇴한 사용자입니다.")
+                        .data(false)
                         .build();
             }
             
-            // 임시 비밀번호 생성
-            String tempPassword = generateTempPassword();
-            
-            // 사용자 비밀번호 업데이트
-            String encodedPassword = passwordEncoder.encode(tempPassword);
-            user.updatePassword(encodedPassword);
-            userRepository.save(user);
-            
-            // 이메일 발송
-            sendPasswordEmail(reqDto.getEmail(), tempPassword);
-
-            return RespDto.<String>builder()
+            return RespDto.<Boolean>builder()
                     .code(1)
-                    .data("이메일 발송에 성공했습니다.")
+                    .data(true)
                     .build();
                     
         } catch (Exception e) {
-            return RespDto.<String>builder()
+            return RespDto.<Boolean>builder()
                     .code(-1)
-                    .data("요청처리를 실패했습니다.")
+                    .data(false)
                     .build();
-        }
-    }
-    /**
-     * 임시 비밀번호 생성 (8자리)
-     */
-    private String generateTempPassword() {
-        String chars = "abcdefghijklmnopqrstuvwxyz123456789!@#";
-        StringBuilder tempPassword = new StringBuilder();
-        Random random = new Random();
-        
-        for (int i = 0; i < 8; i++) {
-            tempPassword.append(chars.charAt(random.nextInt(chars.length())));
-        }
-        
-        return tempPassword.toString();
-    }
-    
-    /**
-     * 임시 비밀번호 이메일 발송
-     */
-    private void sendPasswordEmail(String email, String tempPassword) {
-        try {
-            SimpleMailMessage message = new SimpleMailMessage();
-            message.setTo(email);
-            message.setSubject("몽솜 임시 비밀번호 안내");
-            message.setText("안녕하세요. 몽솜입니다.\n\n" +
-                           "비밀번호는\n" +
-                           tempPassword + "\n" +
-                           "입니다.\n\n" +
-                           "로그인 후 반드시 비밀번호를 변경해주세요.");
-            
-            mailSender.send(message);
-            log.info("임시 비밀번호 이메일 발송 완료 - email: {}", email);
-            
-        } catch (Exception e) {
-            log.error("이메일 발송 실패 - email: {}, error: {}", email, e.getMessage());
-            throw new RuntimeException("이메일 발송에 실패했습니다.");
         }
     }
     //회원정보수정

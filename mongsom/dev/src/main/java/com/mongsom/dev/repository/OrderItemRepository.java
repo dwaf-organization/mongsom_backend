@@ -9,6 +9,7 @@ import java.util.Optional;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -82,5 +83,8 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
             @Param("endDate") LocalDate endDate,
             Pageable pageable);
 
-    
+    // 배송 상태 업데이트
+    @Modifying
+    @Query("UPDATE OrderItem oi SET oi.deliveryStatus = :deliveryStatus WHERE oi.orderId = :orderId")
+    int updateDeliveryStatus(@Param("orderId") Integer orderId, @Param("deliveryStatus") String deliveryStatus);
 }
