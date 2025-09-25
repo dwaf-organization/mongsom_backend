@@ -23,6 +23,7 @@ public class AdminProductDetailRespDto {
     private Integer discountPer;
     private Integer discountPrice;
     private Integer deliveryPrice;
+    private Integer deleteStatus;
     
     // ProductOption 옵션명 리스트
     private List<ProductOptionDto> options;

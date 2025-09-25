@@ -1,5 +1,4 @@
 package com.mongsom.dev.entity;
-
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -7,7 +6,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +17,6 @@ import java.util.List;
 @AllArgsConstructor
 @Builder
 public class Product {
-
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "product_id")
@@ -49,6 +46,10 @@ public class Product {
     @Column(name = "delivery_price")
     private Integer deliveryPrice;
     
+    @Column(name = "delete_status", nullable = false)
+    @Builder.Default
+    private Integer deleteStatus = 0; // 0=생성, 1=삭제
+    
     @CreationTimestamp
     @Column(name = "created_at")
     private LocalDateTime createdAt;
@@ -73,7 +74,6 @@ public class Product {
         }
         this.productOptions.add(productOption);
         
-        // productId를 직접 설정해줘야 함
         productOption.setProductId(this.productId);
         productOption.setProduct(this);
     }
@@ -84,7 +84,6 @@ public class Product {
         }
         this.productImages.add(productImg);
         
-        // ProductImg는 관계 매핑만 있으므로 이대로 OK
         productImg.setProduct(this);
     }
     
@@ -99,5 +98,18 @@ public class Product {
         this.discountPer = discountPer;
         this.discountPrice = discountPrice;
         this.deliveryPrice = deliveryPrice;
+    }
+    
+    // 삭제 상태 관련 메서드
+    public void softDelete() {
+        this.deleteStatus = 1;
+    }
+    
+    public void restore() {
+        this.deleteStatus = 0;
+    }
+    
+    public boolean isDeleted() {
+        return this.deleteStatus == 1;
     }
 }

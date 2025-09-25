@@ -63,6 +63,9 @@ public interface CartRepository extends JpaRepository<Cart, Integer> {
             @Param("userCode") Long userCode, 
             @Param("productId") Integer productId);
     
+    // 특정 상품의 모든 장바구니 항목 삭제
+    int deleteByProductId(Integer productId);
+    
     // 사용자의 상품 삭제
     @Modifying
     @Query("DELETE FROM Cart c WHERE c.userCode = :userCode AND c.productId = :productId")

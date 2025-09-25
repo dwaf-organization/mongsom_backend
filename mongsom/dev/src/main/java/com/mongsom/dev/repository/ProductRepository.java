@@ -22,16 +22,23 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     boolean existsByName(String name);
     
     // 프리미엄 상품만 조회 (리스트)
-    List<Product> findByPremium(Integer premium);
+    Page<Product> findByPremiumAndDeleteStatus(Integer premium, Integer deleteStatus, Pageable pageable);
     
-    // 인기순 조회 (주문 횟수 기준, 페이징 지원) - 카운트 쿼리 분리
+    // 삭제되지 않은 상품만 조회 (페이징)
+    Page<Product> findByDeleteStatusOrderByCreatedAtDesc(Integer deleteStatus, Pageable pageable);
+    
+    // 또는 더 명확한 메서드명
+    Page<Product> findByDeleteStatus(Integer deleteStatus, Pageable pageable);
+    
+ // 인기순 조회 (주문 횟수 기준, 페이징 지원) - 삭제되지 않은 상품만
     @Query(value = "SELECT p.* FROM product p " +
                    "LEFT JOIN (SELECT od.product_id, COUNT(*) as order_count " +
                    "           FROM order_detail od " +
                    "           WHERE od.order_status = 0 " +
                    "           GROUP BY od.product_id) o ON p.product_id = o.product_id " +
-                   "ORDER BY COALESCE(o.order_count, 0) DESC, p.product_id DESC", 
-           countQuery = "SELECT COUNT(p.product_id) FROM product p",
+                   "WHERE p.delete_status = 0 " +
+                   "ORDER BY COALESCE(o.order_count, 0) DESC, p.product_id DESC",
+           countQuery = "SELECT COUNT(p.product_id) FROM product p WHERE p.delete_status = 0",
            nativeQuery = true)
     Page<Product> findAllOrderByPopularityDesc(Pageable pageable);
 
@@ -51,6 +58,7 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
                    "    FROM user_review " +
                    "    GROUP BY product_id" +
                    ") r ON p.product_id = r.product_id " +
+                   "WHERE p.delete_status = 0 " +
                    "ORDER BY COALESCE(r.review_count, 0) DESC, p.product_id DESC",
            countQuery = "SELECT COUNT(*) FROM product",
            nativeQuery = true)
@@ -76,11 +84,9 @@ public interface ProductRepository extends JpaRepository<Product, Integer> {
     //관리자페이지
     
     // 상품명으로 검색 (LIKE %name%)
-    Page<Product> findByNameContaining(String name, Pageable pageable);
-    
-    // 프리미엄 여부로 검색
-    Page<Product> findByPremium(Integer premium, Pageable pageable);
+    Page<Product> findByNameContainingAndDeleteStatus(String name, Integer deleteStatus, Pageable pageable);
     
     // 상품명 + 프리미엄 조건 모두 적용
-    Page<Product> findByNameContainingAndPremium(String name, Integer premium, Pageable pageable);
+    Page<Product> findByNameContainingAndPremiumAndDeleteStatus(String name, Integer premium, Integer deleteStatus, Pageable pageable);
+    
 }

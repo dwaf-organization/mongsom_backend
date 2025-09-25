@@ -20,6 +20,7 @@ public class ProductDetailRespDto {
     private Integer price;
     private Integer discountPer;
     private Integer discountPrice;
+    private Integer deleteStatus;
     private List<String> productImgUrl;
     private List<ProductOptionDto> productOptions;
     
@@ -57,6 +58,7 @@ public class ProductDetailRespDto {
                 .price(product.getPrice())
                 .discountPer(product.getDiscountPer())
                 .discountPrice(product.getDiscountPrice())
+                .deleteStatus(product.getDeleteStatus())
                 .productImgUrl(imgUrls)
                 .productOptions(options)
                 .build();

@@ -27,6 +27,7 @@ import com.mongsom.dev.entity.OrderItem;
 import com.mongsom.dev.entity.Product;
 import com.mongsom.dev.entity.ProductImg;
 import com.mongsom.dev.entity.ProductOption;
+import com.mongsom.dev.repository.CartRepository;
 import com.mongsom.dev.repository.ChangeItemRepository;
 import com.mongsom.dev.repository.OrderDetailRepository;
 import com.mongsom.dev.repository.OrderItemRepository;
@@ -48,6 +49,7 @@ public class AdminProductService {
     private final ChangeItemRepository changeItemRepository;
     private final OrderItemRepository orderItemRepository;
     private final OrderDetailRepository orderDetailRepository;
+    private final CartRepository cartRepository;
     
     //상품등록
     @Transactional
@@ -189,16 +191,16 @@ public class AdminProductService {
     private Page<Product> getProductsByCondition(String name, Integer premium, Pageable pageable) {
         if (name != null && !name.trim().isEmpty() && premium != null && premium != 2) {
             // 상품명 + 프리미엄 조건 모두 적용
-            return productRepository.findByNameContainingAndPremium(name.trim(), premium, pageable);
+            return productRepository.findByNameContainingAndPremiumAndDeleteStatus(name.trim(), premium, 0, pageable);
         } else if (name != null && !name.trim().isEmpty()) {
             // 상품명만 조건 적용
-            return productRepository.findByNameContaining(name.trim(), pageable);
+            return productRepository.findByNameContainingAndDeleteStatus(name.trim(), 0, pageable);
         } else if (premium != null && premium != 2) {
             // 프리미엄 조건만 적용
-            return productRepository.findByPremium(premium, pageable);
+            return productRepository.findByPremiumAndDeleteStatus(premium, 0, pageable);
         } else {
-            // 전체 조회
-            return productRepository.findAll(pageable);
+            // 전체 조회 (삭제되지 않은 상품만)
+            return productRepository.findByDeleteStatus(0, pageable);
         }
     }
     
@@ -290,6 +292,7 @@ public class AdminProductService {
                     .discountPer(product.getDiscountPer())
                     .discountPrice(product.getDiscountPrice())
                     .deliveryPrice(product.getDeliveryPrice())
+                    .deleteStatus(product.getDeleteStatus())
                     .options(options)
                     .productImgUrls(productImgUrls)
                     .build();
@@ -433,9 +436,9 @@ public class AdminProductService {
     
     // 관리자 상품 삭제
     @Transactional
-    public RespDto<Boolean> deleteProduct(Integer productId) {
+    public RespDto<Boolean> softDeleteProduct(Integer productId) {
         try {
-            log.info("=== 관리자 상품 삭제 시작 - productId: {} ===", productId);
+            log.info("=== 관리자 상품 소프트 삭제 시작 - productId: {} ===", productId);
             
             // 1. 상품 존재 여부 확인
             Product product = productRepository.findById(productId).orElse(null);
@@ -447,24 +450,26 @@ public class AdminProductService {
                         .build();
             }
             
-            // 2. 연관된 데이터 삭제 (순서 중요: 자식 → 부모)
-            
-            // 2-1. product_option 테이블 삭제
-            List<ProductOption> productOptions = productOptionRepository.findByProductId(productId);
-            if (!productOptions.isEmpty()) {
-                productOptionRepository.deleteAll(productOptions);
-                log.info("상품 옵션 삭제 완료 - 삭제된 옵션 수: {}", productOptions.size());
+            // 2. 이미 삭제된 상품인지 확인
+            if (product.isDeleted()) {
+                log.warn("이미 삭제된 상품 - productId: {}", productId);
+                return RespDto.<Boolean>builder()
+                        .code(-1)
+                        .data(false)
+                        .build();
             }
             
-            // 2-2. product_img 테이블 삭제
-            productImgRepository.deleteByProductId(productId);
-            log.info("상품 이미지 삭제 완료");
+            // 3. 상품 소프트 삭제 (delete_status = 1)
+            product.softDelete();
+            productRepository.save(product);
+            log.info("상품 소프트 삭제 완료 - productId: {}", productId);
             
-            // 2-3. product 테이블 삭제
-            productRepository.delete(product);
-            log.info("상품 삭제 완료 - productId: {}", productId);
+            // 4. 해당 상품의 모든 장바구니 항목 삭제
+            int deletedCartItems = cartRepository.deleteByProductId(productId);
+            log.info("장바구니에서 상품 삭제 완료 - productId: {}, 삭제된 항목 수: {}", 
+                    productId, deletedCartItems);
             
-            log.info("=== 관리자 상품 삭제 완료 - productId: {} ===", productId);
+            log.info("=== 관리자 상품 소프트 삭제 완료 - productId: {} ===", productId);
             
             return RespDto.<Boolean>builder()
                     .code(1)
@@ -472,7 +477,7 @@ public class AdminProductService {
                     .build();
                     
         } catch (Exception e) {
-            log.error("관리자 상품 삭제 실패 - productId: {}, error: {}", 
+            log.error("관리자 상품 소프트 삭제 실패 - productId: {}, error: {}", 
                     productId, e.getMessage(), e);
             return RespDto.<Boolean>builder()
                     .code(-1)

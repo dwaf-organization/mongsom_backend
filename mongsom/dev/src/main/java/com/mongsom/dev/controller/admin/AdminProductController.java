@@ -92,13 +92,13 @@ public class AdminProductController {
         return ResponseEntity.ok(response);
     }
     //상품삭제
-    @DeleteMapping("/delete/{productId}")
+    @PutMapping("/delete/{productId}")
     public ResponseEntity<RespDto<Boolean>> deleteProduct(@PathVariable("productId") Integer productId) {
         
         log.info("관리자 상품 삭제 요청 - productId: {}", productId);
         
-        RespDto<Boolean> response = adminProductService.deleteProduct(productId);
-        
+        RespDto<Boolean> response = adminProductService.softDeleteProduct(productId);
+
         return ResponseEntity.ok(response);
     }
     

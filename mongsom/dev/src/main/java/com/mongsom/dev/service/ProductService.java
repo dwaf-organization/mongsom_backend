@@ -40,7 +40,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public RespDto<ProductListRespDto> getAllProducts(Pageable pageable) {
         try {
-            Page<Product> productPage = productRepository.findAll(pageable);
+        	Page<Product> productPage = productRepository.findByDeleteStatus(0, pageable);
             
             // 상품 이미지 조회 및 매핑
             Map<Integer, List<String>> productImgMap = getProductImagesMap(productPage.getContent());
@@ -66,7 +66,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public RespDto<ProductListRespDto> getPremiumProducts(Pageable pageable) {
         try {
-            Page<Product> productPage = productRepository.findByPremium(1, pageable);
+        	Page<Product> productPage = productRepository.findByPremiumAndDeleteStatus(1, 0, pageable);
             
             // 상품 이미지 조회 및 매핑
             Map<Integer, List<String>> productImgMap = getProductImagesMap(productPage.getContent());
@@ -135,7 +135,7 @@ public class ProductService {
     @Transactional(readOnly = true)
     public RespDto<ProductListRespDto> getNewProducts(Pageable pageable) {
         try {
-            Page<Product> productPage = productRepository.findAll(pageable);
+        	Page<Product> productPage = productRepository.findByDeleteStatus(0, pageable);
             
             // 상품 이미지 조회 및 매핑
             Map<Integer, List<String>> productImgMap = getProductImagesMap(productPage.getContent());
