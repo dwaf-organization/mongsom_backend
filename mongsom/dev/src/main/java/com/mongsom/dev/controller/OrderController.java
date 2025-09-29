@@ -27,13 +27,13 @@ public class OrderController {
     private final OrderService orderService;
     
     @PostMapping("/create")
-    public ResponseEntity<RespDto<Integer>> createOrder(@Valid @RequestBody OrderCreateReqDto reqDto) {
+    public ResponseEntity<RespDto<String>> createOrder(@Valid @RequestBody OrderCreateReqDto reqDto) {
         
         log.info("주문 생성 요청 - userCode: {}, finalPrice: {}, 결제수단: {}, 상품 수: {}", 
                 reqDto.getUserCode(), reqDto.getFinalPrice(), reqDto.getPaymentMethod(), 
                 reqDto.getOrderDetails().size());
         
-        RespDto<Integer> response = orderService.createOrder(reqDto);
+        RespDto<String> response = orderService.createOrder(reqDto);
         HttpStatus status = response.getCode() == 1 ? HttpStatus.OK : HttpStatus.BAD_REQUEST;
         
         return ResponseEntity.status(status).body(response);

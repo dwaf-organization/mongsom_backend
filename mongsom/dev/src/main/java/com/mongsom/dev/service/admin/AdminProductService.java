@@ -304,7 +304,7 @@ public class AdminProductService {
                     .code(1)
                     .data(result)
                     .build();
-                    
+            
         } catch (Exception e) {
             log.error("관리자 상품 상세조회 실패 - productId: {}, error: {}", 
                     productId, e.getMessage(), e);

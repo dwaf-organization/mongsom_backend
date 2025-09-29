@@ -194,6 +194,8 @@ public class AuthService {
             
             // 탈퇴 처리 (status를 INACTIVE로 변경)
             user.updateStatus(Status.INACTIVE);
+            user.updateUserIdForWithdrawal(userCode + "_deleted");
+            user.updateEmailForWithdrawal(userCode + "_deleted@deleted.com");
             userRepository.save(user);
 
             return RespDto.<String>builder()

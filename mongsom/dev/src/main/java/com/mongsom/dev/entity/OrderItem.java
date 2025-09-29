@@ -35,6 +35,9 @@ public class OrderItem {
     @Column(name = "order_id")
     private Integer orderId;
     
+    @Column(name = "order_num", nullable = false, unique = true, length = 255)
+    private String orderNum;
+    
     @Column(name = "user_code", nullable = false)
     private Long userCode;
     

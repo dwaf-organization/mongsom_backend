@@ -48,6 +48,9 @@ spring:
           starttls:
             enable: true
 
+toss:
+  secret-key: test_sk_LlDJaYngrojJ9APzMLyNVezGdRpX
+
 mybatis:
   mapper-locations:
   - /mappers/*/*.xml

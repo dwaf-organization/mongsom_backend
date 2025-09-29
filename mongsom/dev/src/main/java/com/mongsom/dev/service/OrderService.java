@@ -40,7 +40,7 @@ public class OrderService {
     
     // 주문생성
     @Transactional
-    public RespDto<Integer> createOrder(OrderCreateReqDto reqDto) {
+    public RespDto<String> createOrder(OrderCreateReqDto reqDto) {
         try {
             log.info("주문 생성 시작 - userCode: {}, finalPrice: {}, 상품 수: {}", 
                     reqDto.getUserCode(), reqDto.getFinalPrice(), reqDto.getOrderDetails().size());
@@ -49,7 +49,7 @@ public class OrderService {
             Optional<User> userOpt = userRepository.findUserByUserCode(reqDto.getUserCode());
             if (userOpt.isEmpty()) {
                 log.warn("존재하지 않는 사용자 - userCode: {}", reqDto.getUserCode());
-                return RespDto.<Integer>builder()
+                return RespDto.<String>builder()
                         .code(-1)
                         .data(null)
                         .build();
@@ -60,7 +60,7 @@ public class OrderService {
                 Optional<Product> productOpt = productRepository.findById(detail.getProductId());
                 if (productOpt.isEmpty()) {
                     log.warn("존재하지 않는 상품 - productId: {}", detail.getProductId());
-                    return RespDto.<Integer>builder()
+                    return RespDto.<String>builder()
                             .code(-1)
                             .data(null)
                             .build();
@@ -83,10 +83,16 @@ public class OrderService {
                     .deliveryStatus("결제대기")  // 고정값
                     .paymentAt(reqDto.getPaymentAt() != null ? reqDto.getPaymentAt() : LocalDateTime.now())
                     .changeState(0)  // 기본값: 주문
+                    .orderNum("temp")
                     .build();
             
             OrderItem savedOrderItem = orderItemRepository.save(orderItem);
             Integer orderId = savedOrderItem.getOrderId();
+            
+            // 3-1. orderNum 생성 및 업데이트 (mongsom_orderId 형식)
+            String orderNum = "mongsom_" + orderId;
+            savedOrderItem.setOrderNum(orderNum);
+            orderItemRepository.save(savedOrderItem);
             
             log.info("주문 기본 정보 저장 완료 - orderId: {}", orderId);
             
@@ -126,15 +132,15 @@ public class OrderService {
             log.info("주문 생성 완료 - orderId: {}, userCode: {}, finalPrice: {}", 
                     orderId, reqDto.getUserCode(), reqDto.getFinalPrice());
             
-            return RespDto.<Integer>builder()
+            return RespDto.<String>builder()
                     .code(1)
-                    .data(orderId)
+                    .data(orderNum)
                     .build();
             
         } catch (Exception e) {
             log.error("주문 생성 실패 - userCode: {}, finalPrice: {}", 
                     reqDto.getUserCode(), reqDto.getFinalPrice(), e);
-            return RespDto.<Integer>builder()
+            return RespDto.<String>builder()
                     .code(-1)
                     .data(null)
                     .build();

@@ -117,4 +117,14 @@ public class User {
         this.agreeSms = agreeSms;
         this.agreeEmail = agreeEmail;
     }
+    
+    // 탈퇴 시 userId 변경
+    public void updateUserIdForWithdrawal(String withdrawnUserId) {
+        this.userId = withdrawnUserId;
+    }
+    
+    // 탈퇴 시 email 변경
+    public void updateEmailForWithdrawal(String withdrawnEmail) {
+        this.email = withdrawnEmail;
+    }
 }
