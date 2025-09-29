@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.mongsom.dev.common.dto.RespDto;
 import com.mongsom.dev.dto.payment.reqDto.PaymentConfirmReqDto;
 import com.mongsom.dev.service.PaymentService;
 
@@ -28,13 +29,13 @@ public class PaymentController {
      * 토스페이먼츠 결제 승인
      */
     @PostMapping("/confirm")
-    public ResponseEntity<Map<String, Object>> confirmPayment(
+    public ResponseEntity<RespDto<String>> confirmPayment(
             @RequestBody PaymentConfirmReqDto reqDto) {
         
         log.info("결제 승인 요청 - paymentKey: {}, orderId: {}, amount: {}", 
                 reqDto.getPaymentKey(), reqDto.getOrderId(), reqDto.getAmount());
         
-        Map<String, Object> response = paymentService.confirmPayment(reqDto);
+        RespDto<String> response = paymentService.confirmPayment(reqDto);
         
         return ResponseEntity.ok(response);
     }

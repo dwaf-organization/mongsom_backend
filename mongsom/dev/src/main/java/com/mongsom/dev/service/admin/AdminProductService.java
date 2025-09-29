@@ -589,8 +589,8 @@ public class AdminProductService {
                     reqDto.getChangeId(), reqDto.getApprovalStatus());
             
             // 1. 교환/반품 항목 존재 여부 확인
-            boolean exists = changeItemRepository.existsById(reqDto.getChangeId());
-            if (!exists) {
+            Optional<ChangeItem> changeItemOpt = changeItemRepository.findById(reqDto.getChangeId());
+            if (changeItemOpt.isEmpty()) {
                 log.warn("교환/반품 항목을 찾을 수 없음 - changeId: {}", reqDto.getChangeId());
                 return RespDto.<Boolean>builder()
                         .code(-1)
@@ -598,15 +598,66 @@ public class AdminProductService {
                         .build();
             }
             
+            ChangeItem changeItem = changeItemOpt.get();
+            Integer changeStatus = changeItem.getChangeStatus();  // 1=교환, 2=반품
+            Integer orderId = changeItem.getOrderId();
+            Integer orderDetailId = changeItem.getOrderDetailId();
+            
             // 2. approval_status 업데이트
             int updatedRows = changeItemRepository.updateApprovalStatus(
                     reqDto.getChangeId(), reqDto.getApprovalStatus());
             
             if (updatedRows > 0) {
                 String statusText = getApprovalStatusText(reqDto.getApprovalStatus());
-                log.info("=== 교환/반품 승인/반려 처리 완료 - changeId: {}, 상태: {} ===", 
+                log.info("=== 교환/반품 승인/반려 처리 완료 - changeId: {}, 상태: {} ===",
                         reqDto.getChangeId(), statusText);
-                
+
+                // 3. 반품(changeStatus=2)이고 승인(approvalStatus=1)인 경우 추가 처리
+                if (changeStatus == 2 && reqDto.getApprovalStatus() == 1) {
+                    log.info("=== 반품 승인 추가 처리 시작 - orderId: {}, orderDetailId: {} ===", 
+                            orderId, orderDetailId);
+                    
+                    // 3-1. order_detail의 order_status를 1로 변경
+                    Optional<OrderDetail> orderDetailOpt = orderDetailRepository.findById(orderDetailId);
+                    if (orderDetailOpt.isPresent()) {
+                        OrderDetail orderDetail = orderDetailOpt.get();
+                        orderDetail.setOrderStatus(1);
+                        orderDetailRepository.save(orderDetail);
+                        
+                        log.info("OrderDetail 업데이트 완료 - orderDetailId: {}, orderStatus: 1", orderDetailId);
+                        
+                        // 3-2. 같은 orderId를 가진 모든 OrderDetail 조회
+                        List<OrderDetail> allOrderDetails = orderDetailRepository.findByOrderId(orderId);
+                        
+                        // 3-3. 모든 주문 상세의 orderStatus가 1인지 확인
+                        boolean allCanceled = allOrderDetails.stream()
+                                .allMatch(od -> od.getOrderStatus() != null && od.getOrderStatus() == 1);
+                        
+                        log.info("주문 상세 확인 - orderId: {}, 전체 상품 수: {}, 모두 취소: {}", 
+                                orderId, allOrderDetails.size(), allCanceled);
+                        
+                        // 3-4. 모두 취소되었으면 order_item의 delivery_status를 '주문취소'로 변경
+                        if (allCanceled) {
+                            Optional<OrderItem> orderItemOpt = orderItemRepository.findById(orderId);
+                            if (orderItemOpt.isPresent()) {
+                                OrderItem orderItem = orderItemOpt.get();
+                                orderItem.setDeliveryStatus("주문취소");
+                                orderItemRepository.save(orderItem);
+                                
+                                log.info("OrderItem 업데이트 완료 - orderId: {}, deliveryStatus: 주문취소", orderId);
+                            } else {
+                                log.warn("OrderItem을 찾을 수 없음 - orderId: {}", orderId);
+                            }
+                        } else {
+                            log.info("일부 상품만 취소됨 - OrderItem 상태 유지");
+                        }
+                    } else {
+                        log.warn("OrderDetail을 찾을 수 없음 - orderDetailId: {}", orderDetailId);
+                    }
+                    
+                    log.info("=== 반품 승인 추가 처리 완료 ===");
+                }
+
                 return RespDto.<Boolean>builder()
                         .code(1)
                         .data(true)

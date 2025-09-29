@@ -22,6 +22,9 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
 	// 주문번호와 사용자 코드로 주문 정보 조회
     Optional<OrderItem> findByOrderIdAndUserCode(Integer orderId, Long userCode);
     
+    // orderNum으로 주문 조회 (토스페이먼츠 orderId로 조회)
+    Optional<OrderItem> findByOrderNum(String orderNum);
+    
     // 특정 사용자의 주문 조회 (최신순)
     @Query("SELECT o FROM OrderItem o WHERE o.userCode = :userCode ORDER BY o.createdAt DESC")
     List<OrderItem> findByUserCodeOrderByCreatedAtDesc(@Param("userCode") Long userCode);
