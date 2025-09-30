@@ -45,9 +45,10 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Integer> {
 
     // 사용자별 주문 기본 정보 조회 - paymentAt 내림차순
     @Query("SELECT oi FROM OrderItem oi " +
-           "WHERE oi.userCode = :userCode " +
-           "ORDER BY oi.paymentAt DESC")
-    List<OrderItem> findOrdersByUserCode(@Param("userCode") Long userCode);
+            "WHERE oi.userCode = :userCode " +
+            "AND oi.deliveryStatus != '결제대기' " +
+            "ORDER BY oi.createdAt DESC")
+     List<OrderItem> findOrdersByUserCode(@Param("userCode") Long userCode);
     
     // 주문 ID로 배송 정보 조회 (택배회사, 송장번호)
     @Query(value = "SELECT delivery_com, invoice_num FROM order_item WHERE order_id = :orderId", nativeQuery = true)
