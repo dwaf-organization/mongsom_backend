@@ -61,15 +61,11 @@ public class User {
     @Column(name = "agree_email")
     private Boolean agreeEmail;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "provider", nullable = false)
-    private Provider provider;
+    private String provider;
     
     @PrePersist
     public void prePersist() {
-        if (this.provider == null) {
-            this.provider = Provider.LOCAL;
-        }
         if (this.status == null) {
             this.status = Status.ACTIVE;
         }

@@ -58,7 +58,7 @@ public class AuthService {
                     .agreeSms(reqDto.isAgreeSms())
                     .agreeEmail(reqDto.isAgreeEmail())
                     .role(Role.USER)
-                    .provider(Provider.LOCAL)
+                    .provider(reqDto.getProvider())
                     .status(Status.ACTIVE)
                     .build();
             
