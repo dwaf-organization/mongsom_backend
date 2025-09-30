@@ -50,4 +50,15 @@ public interface UserRepository extends JpaRepository<User, Long> {
     	       "AND u.provider = 'NAVER'")
     	Optional<User> findByEmailAndName(@Param("email") String email, @Param("name") String name);
     
+    /**
+     * 관리자 로그인 - userId와 provider로 관리자 조회
+     * 
+     * @param userId 관리자 아이디
+     * @return 관리자 사용자
+     */
+    @Query("SELECT u FROM User u " +
+           "WHERE u.userId = :userId " +
+           "AND u.provider = 'ADMIN'")
+    Optional<User> findAdminByUserId(@Param("userId") String userId);
+    
 }
