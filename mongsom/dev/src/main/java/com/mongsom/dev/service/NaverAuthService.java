@@ -1,5 +1,7 @@
 package com.mongsom.dev.service;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -12,8 +14,11 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.web.client.RestTemplate;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongsom.dev.common.dto.RespDto;
+import com.mongsom.dev.dto.auth.respDto.NaverLoginRespDto;
 import com.mongsom.dev.dto.auth.respDto.NaverProfileRespDto;
 import com.mongsom.dev.dto.auth.respDto.NaverTokenRespDto;
+import com.mongsom.dev.entity.User;
+import com.mongsom.dev.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -25,6 +30,7 @@ public class NaverAuthService {
     
     private final RestTemplate restTemplate;
     private final ObjectMapper objectMapper;
+    private final UserRepository userRepository;
     
     @Value("${naver.client-id}")
     private String clientId;
@@ -38,7 +44,7 @@ public class NaverAuthService {
      * @param state 상태 토큰
      * @return 네이버 프로필 정보
      */
-    public RespDto<NaverProfileRespDto> getNaverProfile(String code, String state) {
+    public RespDto<NaverLoginRespDto> getNaverProfile(String code, String state) {
         try {
             log.info("=== 네이버 로그인 시작 ===");
             log.info("Code: {}, State: {}", code, state);
@@ -48,7 +54,7 @@ public class NaverAuthService {
             
             if (tokenResponse == null || tokenResponse.getAccessToken() == null) {
                 log.error("Access Token 발급 실패");
-                return RespDto.<NaverProfileRespDto>builder()
+                return RespDto.<NaverLoginRespDto>builder()
                         .code(-1)
                         .data(null)
                         .build();
@@ -61,26 +67,56 @@ public class NaverAuthService {
             
             if (profileResponse == null || !"00".equals(profileResponse.getResultCode())) {
                 log.error("프로필 조회 실패");
-                return RespDto.<NaverProfileRespDto>builder()
+                return RespDto.<NaverLoginRespDto>builder()
                         .code(-1)
                         .data(null)
                         .build();
             }
             
-            log.info("=== 네이버 로그인 성공 ===");
-            log.info("사용자 정보 - email: {}, name: {}, nickname: {}", 
-                    profileResponse.getResponse().getEmail(),
-                    profileResponse.getResponse().getName(),
-                    profileResponse.getResponse().getNickname());
+            String email = profileResponse.getResponse().getEmail();
+            String name = profileResponse.getResponse().getName();
             
-            return RespDto.<NaverProfileRespDto>builder()
-                    .code(1)
-                    .data(profileResponse)
-                    .build();
+            log.info("프로필 조회 성공 - email: {}, name: {}", email, name);
+            
+            // 3. 기존 회원 여부 확인 (email, name, provider=NAVER)
+            Optional<User> userOpt = userRepository.findByEmailAndName(email, name);
+            
+            if (userOpt.isPresent()) {
+                // 기존 회원 - userCode 반환
+                User user = userOpt.get();
+                Long userCode = user.getUserCode();
+                
+                log.info("=== 기존 회원 확인 ===");
+                log.info("UserCode: {}, Email: {}, Name: {}", userCode, email, name);
+                
+                NaverLoginRespDto responseDto = NaverLoginRespDto.builder()
+                        .userCode(userCode)
+                        .profile(null)
+                        .build();
+                
+                return RespDto.<NaverLoginRespDto>builder()
+                        .code(1)  // 기존 회원
+                        .data(responseDto)
+                        .build();
+                
+            } else {
+                // 신규 회원 - 프로필 정보 반환
+                log.info("=== 신규 회원 - 프로필 정보 반환 ===");
+                
+                NaverLoginRespDto responseDto = NaverLoginRespDto.builder()
+                        .userCode(null)
+                        .profile(profileResponse)
+                        .build();
+                
+                return RespDto.<NaverLoginRespDto>builder()
+                        .code(2)  // 신규 회원
+                        .data(responseDto)
+                        .build();
+            }
             
         } catch (Exception e) {
             log.error("네이버 로그인 실패", e);
-            return RespDto.<NaverProfileRespDto>builder()
+            return RespDto.<NaverLoginRespDto>builder()
                     .code(-1)
                     .data(null)
                     .build();
