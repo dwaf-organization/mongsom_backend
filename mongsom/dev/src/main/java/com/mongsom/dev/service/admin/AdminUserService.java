@@ -26,12 +26,7 @@ public class AdminUserService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
     
-    /**
-     * 관리자 회원 정보 조회 (페이지네이션)
-     * @param page 페이지 번호 (1부터 시작)
-     * @param size 페이지 크기
-     * @return 회원 목록 및 페이지 정보
-     */
+    // 관리자 회원 정보 조회 (페이지네이션)
     public RespDto<AdminUserListRespDto> getUserList(Integer page, Integer size) {
         try {
             log.info("=== 관리자 회원 정보 조회 시작 - page: {}, size: {} ===", page, size);
@@ -40,7 +35,7 @@ public class AdminUserService {
             Pageable pageable = PageRequest.of(page - 1, size, Sort.by("userCode").descending());
             
             // 회원 정보 조회
-            Page<User> userPage = userRepository.findAll(pageable);
+            Page<User> userPage = userRepository.findActiveUsers(pageable);
             
             // User 엔티티를 UserInfo DTO로 변환
             List<AdminUserListRespDto.UserInfo> userInfoList = userPage.getContent().stream()

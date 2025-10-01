@@ -2,8 +2,10 @@ package com.mongsom.dev.repository;
 
 import org.springframework.stereotype.Repository;
 
+import org.springframework.data.domain.Pageable;
 import java.util.Optional;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -60,5 +62,10 @@ public interface UserRepository extends JpaRepository<User, Long> {
            "WHERE u.userId = :userId " +
            "AND u.provider = 'ADMIN'")
     Optional<User> findAdminByUserId(@Param("userId") String userId);
+    
+    @Query("SELECT u FROM User u " +
+    	       "WHERE u.status = 'active' " +
+    	       "ORDER BY u.userCode DESC")
+	Page<User> findActiveUsers(Pageable pageable);
     
 }
