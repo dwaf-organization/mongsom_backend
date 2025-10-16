@@ -18,6 +18,7 @@ public class ProductDetailRespDto {
     private String name;
     private String contents;
     private Integer price;
+    private Integer salesMargin;
     private Integer discountPer;
     private Integer discountPrice;
     private Integer deleteStatus;
@@ -56,6 +57,7 @@ public class ProductDetailRespDto {
                 .name(product.getName())
                 .contents(product.getContents())
                 .price(product.getPrice())
+                .salesMargin(product.getSalesMargin())
                 .discountPer(product.getDiscountPer())
                 .discountPrice(product.getDiscountPrice())
                 .deleteStatus(product.getDeleteStatus())

@@ -39,8 +39,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: donguk585@gmail.com
-    password: hgwd udjv wddu wvhu
+    username: mongsomofficial@gmail.com
+    password: phqt gyrf nvzo brxi
     properties:
       mail:
         smtp:
@@ -49,7 +49,7 @@ spring:
             enable: true
 
 toss:
-  secret-key: test_sk_LlDJaYngrojJ9APzMLyNVezGdRpX
+  secret-key: live_sk_Poxy1XQL8RmZ5lBMBaZ9r7nO5Wml
 
 naver:
   client-id: JKQvPJoj1kRYRAmSvI6n

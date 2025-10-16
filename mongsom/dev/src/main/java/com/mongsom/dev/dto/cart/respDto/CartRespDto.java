@@ -37,6 +37,7 @@ public class CartRespDto {
         private Integer productId;
         private String productName;
         private Integer price;
+        private Integer salesMargin;
         private Integer discountPer;
         private Integer discountPrice;
         private Integer quantity;
@@ -60,6 +61,7 @@ public class CartRespDto {
                     .productId(cart.getProduct().getProductId())
                     .productName(cart.getProduct().getName())
                     .price(cart.getProduct().getPrice())
+                    .salesMargin(cart.getProduct().getSalesMargin())
                     .discountPer(cart.getProduct().getDiscountPer())
                     .discountPrice(cart.getProduct().getDiscountPrice())
                     .quantity(cart.getQuantity())

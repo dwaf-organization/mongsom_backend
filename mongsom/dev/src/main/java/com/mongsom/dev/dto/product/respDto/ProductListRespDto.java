@@ -25,6 +25,7 @@ public class ProductListRespDto {
         private Integer productId;
         private String name;
         private Integer price;
+        private Integer salesMargin;
         private Integer discountPer;
         private Integer discountPrice;
         private List<String> productImgUrls;
@@ -34,6 +35,7 @@ public class ProductListRespDto {
                     .productId(product.getProductId())
                     .name(product.getName())
                     .price(product.getPrice())
+                    .salesMargin(product.getSalesMargin())
                     .discountPer(product.getDiscountPer())
                     .discountPrice(product.getDiscountPrice())
                     .productImgUrls(productImgUrls != null ? productImgUrls : List.of())
