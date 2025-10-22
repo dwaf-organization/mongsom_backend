@@ -39,22 +39,26 @@ public interface ChangeItemRepository extends JpaRepository<ChangeItem, Integer>
     
     // 교환/반품 상품 목록 조회 (복합 조인 쿼리)
     @Query(value = "SELECT " +
-                   "ci.change_id, ci.order_detail_id, ci.order_id, ci.user_code, " +
-                   "ci.change_status, ci.approval_status, ci.contents, " +
-                   "oi.payment_at, oi.received_user_name, oi.final_price, " +
-                   "p.name, GROUP_CONCAT(pi.product_img_url SEPARATOR ',') " +
-                   "FROM change_item ci " +
-                   "JOIN order_item oi ON ci.order_id = oi.order_id " +
-                   "JOIN order_detail od ON ci.order_detail_id = od.order_detail_id " +
-                   "JOIN product p ON od.product_id = p.product_id " +
-                   "LEFT JOIN product_img pi ON p.product_id = pi.product_id " +
-                   "WHERE ci.change_status = :changeStatus " +
-                   "GROUP BY ci.change_id, ci.order_detail_id, ci.order_id, ci.user_code, " +
-                   "ci.change_status, ci.approval_status, ci.contents, " +
-                   "oi.payment_at, oi.received_user_name, oi.final_price, p.name " +
-                   "ORDER BY ci.created_at DESC " +
-                   "LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}", 
-           nativeQuery = true)
+            "ci.change_id, ci.order_detail_id, ci.order_id, ci.user_code, " +
+            "ci.change_status, ci.approval_status, ci.contents, " +
+            "oi.payment_at, oi.received_user_name, " +
+            "od.price, " +
+            "p.name, " +
+            "po.opt_name, " +
+            "GROUP_CONCAT(pi.product_img_url SEPARATOR ',') " +
+            "FROM change_item ci " +
+            "JOIN order_item oi ON ci.order_id = oi.order_id " +
+            "JOIN order_detail od ON ci.order_detail_id = od.order_detail_id " +
+            "JOIN product p ON od.product_id = p.product_id " +
+            "LEFT JOIN product_option po ON od.opt_id = po.opt_id " +
+            "LEFT JOIN product_img pi ON p.product_id = pi.product_id " +
+            "WHERE ci.change_status = :changeStatus " +
+            "GROUP BY ci.change_id, ci.order_detail_id, ci.order_id, ci.user_code, " +
+            "ci.change_status, ci.approval_status, ci.contents, " +
+            "oi.payment_at, oi.received_user_name, od.price, p.name, po.opt_name " +
+            "ORDER BY ci.created_at DESC " +
+            "LIMIT :#{#pageable.pageSize} OFFSET :#{#pageable.offset}",
+            nativeQuery = true)
     List<Object[]> findChangeProductListByStatus(@Param("changeStatus") Integer changeStatus, 
                                                  Pageable pageable);
     

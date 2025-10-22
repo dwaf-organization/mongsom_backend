@@ -542,7 +542,7 @@ public class AdminProductService {
     private ChangeProductListRespDto.ChangeItemDto convertToChangeItemDto(Object[] row) {
         try {
             // 이미지 URL 문자열을 List로 변환
-            String imageUrls = (String) row[11];  // GROUP_CONCAT 결과는 마지막 인덱스
+            String imageUrls = (String) row[12];  // GROUP_CONCAT 결과는 마지막 인덱스
             List<String> productImgUrls = parseImageUrls(imageUrls);
             
             // userCode Integer -> Long 변환
@@ -562,8 +562,9 @@ public class AdminProductService {
                     .contents((String) row[6])            // ci.contents
                     .paymentAt(paymentAt)                 // oi.payment_at (Timestamp -> LocalDateTime)
                     .receivedUserName((String) row[8])    // oi.received_user_name
-                    .finalPrice((Integer) row[9])         // oi.final_price
+                    .price((Integer) row[9])
                     .productName((String) row[10])        // p.name
+                    .optName((String) row[11])
                     .productImgUrls(productImgUrls)       // GROUP_CONCAT(pi.img_url)
                     .build();
                     

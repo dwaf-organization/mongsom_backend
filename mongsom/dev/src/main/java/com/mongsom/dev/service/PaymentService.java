@@ -11,6 +11,7 @@ import com.mongsom.dev.common.dto.RespDto;
 import com.mongsom.dev.dto.payment.reqDto.PaymentConfirmReqDto;
 import com.mongsom.dev.entity.OrderItem;
 import com.mongsom.dev.entity.Payments;
+import com.mongsom.dev.repository.CartRepository;
 import com.mongsom.dev.repository.OrderItemRepository;
 import com.mongsom.dev.repository.PaymentsRepository;
 
@@ -33,6 +34,7 @@ public class PaymentService {
     private final ObjectMapper objectMapper;
     private final OrderItemRepository orderItemRepository;
     private final PaymentsRepository paymentsRepository;
+    private final CartRepository cartRepository;
     
     @Value("${toss.secret-key}")
     private String tossSecretKey;
@@ -134,6 +136,11 @@ public class PaymentService {
                     log.info("Payments 업데이트 완료 - paymentId: {}, orderId: {}, method: {}, amount: {}, status: COMPLETED", 
                             payment.getPaymentId(), orderId, method, totalAmount);
                 }
+                
+                // 8-5. 결제 완료 시 장바구니 삭제
+                int deletedCartCount = cartRepository.deleteByUserCode(reqDto.getUserCode());
+                log.info("장바구니 삭제 완료 - userCode: {}, 삭제된 항목 수: {}", 
+                        reqDto.getUserCode(), deletedCartCount);
                 
                 log.info("=== DB 업데이트 완료 ===");
                 

@@ -33,10 +33,15 @@ public class ChangeProductListRespDto {
         // order_item 테이블 조인
         private LocalDateTime paymentAt;
         private String receivedUserName;
-        private Integer finalPrice;
+        
+        // order_detail 테이블 조인
+        private Integer price;
         
         // product 테이블 조인
         private String productName;
+        
+        // product_option 테이블 조인
+        private String optName;
         
         // product_img 테이블 조인
         private List<String> productImgUrls;

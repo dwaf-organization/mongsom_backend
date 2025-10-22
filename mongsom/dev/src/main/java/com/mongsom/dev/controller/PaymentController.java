@@ -32,8 +32,8 @@ public class PaymentController {
     public ResponseEntity<RespDto<String>> confirmPayment(
             @RequestBody PaymentConfirmReqDto reqDto) {
         
-        log.info("결제 승인 요청 - paymentKey: {}, orderId: {}, amount: {}", 
-                reqDto.getPaymentKey(), reqDto.getOrderId(), reqDto.getAmount());
+        log.info("결제 승인 요청 - userCode: {}, paymentKey: {}, orderId: {}, amount: {}", 
+        		reqDto.getUserCode(), reqDto.getPaymentKey(), reqDto.getOrderId(), reqDto.getAmount());
         
         RespDto<String> response = paymentService.confirmPayment(reqDto);
         
