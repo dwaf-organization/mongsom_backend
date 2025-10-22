@@ -49,7 +49,7 @@ spring:
             enable: true
 
 toss:
-  secret-key: live_sk_Poxy1XQL8RmZ5lBMBaZ9r7nO5Wml
+  secret-key: live_gsk_yZqmkKeP8ga5EMdwG1axVbQRxB9l
 
 naver:
   client-id: JKQvPJoj1kRYRAmSvI6n
