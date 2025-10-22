@@ -5,6 +5,7 @@ import org.springframework.http.*;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.mongsom.dev.common.dto.RespDto;
@@ -42,6 +43,7 @@ public class PaymentService {
     /**
      * 토스페이먼츠 결제 승인
      */
+    @Transactional
     public RespDto<String> confirmPayment(PaymentConfirmReqDto reqDto) {
         try {
             log.info("=== 토스페이먼츠 결제 승인 요청 시작 ===");
