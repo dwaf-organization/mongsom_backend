@@ -1,5 +1,5 @@
 # x86
-FROM openjdk:21-jdk
+FROM eclipse-temurin:21-jdk
 
 ARG JAR_FILE=build/libs/*.jar
 

@@ -55,7 +55,7 @@ List<Object[]> findOrderDetailItemsByOrderId(@Param("orderId") Integer orderId);
                    "JOIN product p ON od.product_id = p.product_id " +
                    "LEFT JOIN product_option po ON od.opt_id = po.opt_id AND od.product_id = po.product_id " +
                    "WHERE od.user_code = :userCode " +
-                   //"AND oi.delivery_status = '배송완료' " +
+                   "AND oi.delivery_status = '배송완료' " +
                    "AND od.review_status = 0 " +
                    "ORDER BY oi.payment_at DESC " +
                    "LIMIT :limit OFFSET :offset", nativeQuery = true)
@@ -68,7 +68,7 @@ List<Object[]> findOrderDetailItemsByOrderId(@Param("orderId") Integer orderId);
                    "FROM order_detail od " +
                    "JOIN order_item oi ON od.order_id = oi.order_id " +
                    "WHERE od.user_code = :userCode " +
-                   //"AND oi.delivery_status = '배송완료' " +
+                   "AND oi.delivery_status = '배송완료' " +
                    "AND od.review_status = 0", nativeQuery = true)
     Integer countReviewableProducts(@Param("userCode") Long userCode);
     
