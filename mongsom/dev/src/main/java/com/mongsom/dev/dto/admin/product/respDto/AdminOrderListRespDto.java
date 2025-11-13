@@ -18,16 +18,17 @@ public class AdminOrderListRespDto {
     private Integer orderId;
     private Long userCode;
     private String receivedUserName;
+    private String receivedUserPhone;  // 새로 추가된 필드
     private Integer finalPrice;
     private String deliveryStatus;
     private String deliveryCom;
     private String invoiceNum;
     private Integer changeState;
     private LocalDateTime paymentAt;
-    
+
     // order_detail + product + product_img 정보
     private List<OrderDetailDto> orderDetails;
-    
+
     @Data
     @Builder
     @NoArgsConstructor

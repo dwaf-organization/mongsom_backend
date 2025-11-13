@@ -28,22 +28,29 @@ public class AdminOrderController {
 
 	private final AdminOrderService adminOrderService;
 	//관리자 주문 목록조회
-    @GetMapping("/list/{page}/{size}")
-    public ResponseEntity<RespDto<AdminOrderListWithPagingRespDto>> getOrderList(
-            @PathVariable("page") Integer page,
-            @PathVariable("size") Integer size,
-            @RequestParam("startDate") String startDate,
-            @RequestParam("endDate") String endDate,
-            @RequestParam(value = "orderId", required = false) String orderId) {
-
-        log.info("관리자 주문 조회 요청 - page: {}, size: {}, startDate: {}, endDate: {}, orderId: {}",
-                page, size, startDate, endDate, orderId);
-
-        RespDto<AdminOrderListWithPagingRespDto> response =
-                adminOrderService.getOrderList(page, size, startDate, endDate, orderId);
-
-        return ResponseEntity.ok(response);
-    }
+	@GetMapping("/list/{page}/{size}")
+	public ResponseEntity<RespDto<AdminOrderListWithPagingRespDto>> getOrderList(
+	        @PathVariable("page") Integer page,
+	        @PathVariable("size") Integer size,
+	        @RequestParam("startDate") String startDate,
+	        @RequestParam("endDate") String endDate,
+	        @RequestParam(value = "orderId", required = false) String orderId,
+	        @RequestParam(value = "receivedUserName", required = false) String receivedUserName,
+	        @RequestParam(value = "receivedUserPhone", required = false) String receivedUserPhone,
+	        @RequestParam(value = "deliveryStatus", required = false, defaultValue = "전체") String deliveryStatus,
+	        @RequestParam(value = "invoiceNum", required = false) String invoiceNum) {
+	    
+	    log.info("=== 관리자 주문조회 요청 ===");
+	    log.info("페이지: {}/{}, 기간: {}~{}", page, size, startDate, endDate);
+	    log.info("주문번호: {}, 수취인: {}, 전화번호: {}", orderId, receivedUserName, receivedUserPhone);
+	    log.info("배송상태: {}, 송장번호: {}", deliveryStatus, invoiceNum);
+	    
+	    RespDto<AdminOrderListWithPagingRespDto> response = adminOrderService.getOrderList(
+	            page, size, startDate, endDate, orderId, receivedUserName, 
+	            receivedUserPhone, deliveryStatus, invoiceNum);
+	    
+	    return ResponseEntity.ok(response);
+	}
     
     // 관리자 주문 상세 조회
     @GetMapping("/detail/{orderId}")

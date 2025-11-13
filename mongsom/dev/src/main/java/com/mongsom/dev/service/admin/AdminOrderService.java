@@ -1,7 +1,5 @@
 package com.mongsom.dev.service.admin;
 
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -47,7 +45,7 @@ public class AdminOrderService {
     private final PaymentsRepository paymentsRepository;
     private final ChangeItemRepository changeItemRepository;
     
-    // 관리자 주문 조회 (페이징)
+    // 기존 메서드 - 완전 그대로 유지
     public RespDto<AdminOrderListWithPagingRespDto> getOrderList(Integer page, Integer size, String startDate, String endDate, String orderId) {
         try {
             log.info("=== 관리자 주문 조회 시작 - page: {}, startDate: {}, endDate: {}, orderId: {} ===", 
@@ -90,26 +88,99 @@ public class AdminOrderService {
         }
     }
     
-    // 조건에 따른 주문 조회 (페이징) (상품목록조회용)
+    // 새로운 메서드 - 추가 파라미터 포함 (오버로딩)
+    public RespDto<AdminOrderListWithPagingRespDto> getOrderList(
+            Integer page, Integer size, String startDate, String endDate, String orderId,
+            String receivedUserName, String receivedUserPhone, String deliveryStatus, String invoiceNum) {
+        
+        try {
+            log.info("=== 관리자 주문 조회 시작 (확장버전) ===");
+            log.info("페이지: {}/{}, 기간: {}~{}", page, size, startDate, endDate);
+            log.info("주문번호: {}, 수취인: {}, 전화번호: {}", orderId, receivedUserName, receivedUserPhone);
+            log.info("배송상태: {}, 송장번호: {}", deliveryStatus, invoiceNum);
+            
+            // 1. 검색 조건 처리
+            String processedDeliveryStatus = "전체".equals(deliveryStatus) ? null : deliveryStatus;
+            
+            // 2. 조건에 따른 주문 조회 (새로운 복합 검색)
+            Page<OrderItem> orderItemPage = getOrdersByAdvancedConditionWithPaging(
+                    page - 1, size, startDate, endDate, orderId, 
+                    receivedUserName, receivedUserPhone, processedDeliveryStatus, invoiceNum);
+            
+            // 3. DTO 변환 (전화번호 포함)
+            List<AdminOrderListRespDto> orderDtos = orderItemPage.getContent().stream()
+                    .map(this::convertToAdminOrderDtoWithPhone)
+                    .collect(Collectors.toList());
+            
+            // 4. 페이징 정보 생성
+            AdminOrderListWithPagingRespDto responseWithPaging = AdminOrderListWithPagingRespDto.builder()
+                    .orders(orderDtos)
+                    .pagination(AdminOrderListWithPagingRespDto.PaginationDto.builder()
+                            .currentPage(page)
+                            .totalPage(orderItemPage.getTotalPages())
+                            .size(size)
+                            .hasNext(orderItemPage.hasNext())
+                            .build())
+                    .build();
+            
+            log.info("=== 관리자 주문 조회 완료 (확장버전) - 조회된 주문 수: {}, 총 페이지: {} ===", 
+                    orderDtos.size(), orderItemPage.getTotalPages());
+            
+            return RespDto.<AdminOrderListWithPagingRespDto>builder()
+                    .code(1)
+                    .data(responseWithPaging)
+                    .build();
+                    
+        } catch (Exception e) {
+            log.error("관리자 주문 조회 실패 (확장버전): {}", e.getMessage(), e);
+            return RespDto.<AdminOrderListWithPagingRespDto>builder()
+                    .code(-1)
+                    .data(null)
+                    .build();
+        }
+    }
+    
+    // 새로운 복합 검색 메서드
+    private Page<OrderItem> getOrdersByAdvancedConditionWithPaging(
+            Integer page, Integer size, String startDate, String endDate, String orderId,
+            String receivedUserName, String receivedUserPhone, String deliveryStatus, String invoiceNum) {
+        
+        // Pageable 객체 생성
+        Pageable pageable = PageRequest.of(page, size);
+        
+        // null이나 빈 문자열을 null로 통일 처리
+        String cleanOrderId = (orderId == null || orderId.trim().isEmpty()) ? null : orderId.trim();
+        String cleanReceivedUserName = (receivedUserName == null || receivedUserName.trim().isEmpty()) ? null : receivedUserName.trim();
+        String cleanReceivedUserPhone = (receivedUserPhone == null || receivedUserPhone.trim().isEmpty()) ? null : receivedUserPhone.trim();
+        String cleanDeliveryStatus = (deliveryStatus == null || deliveryStatus.trim().isEmpty()) ? null : deliveryStatus.trim();
+        String cleanInvoiceNum = (invoiceNum == null || invoiceNum.trim().isEmpty()) ? null : invoiceNum.trim();
+        
+        log.debug("검색 조건 정리 - orderId: {}, receivedUserName: {}, receivedUserPhone: {}, deliveryStatus: {}, invoiceNum: {}", 
+                cleanOrderId, cleanReceivedUserName, cleanReceivedUserPhone, cleanDeliveryStatus, cleanInvoiceNum);
+        
+        // 새로운 복합 검색 쿼리 호출
+        return orderItemRepository.findOrdersByAdminConditionsWithPaging(
+                startDate, endDate, cleanOrderId, cleanReceivedUserName, cleanReceivedUserPhone, 
+                cleanDeliveryStatus, cleanInvoiceNum, pageable);
+    }
+    
+    // 기존 조건 검색 메서드 - 수정: String으로 날짜 전달
     private Page<OrderItem> getOrdersByConditionWithPaging(Integer page, Integer size, String startDate, String endDate, String orderId) {
         // Pageable 객체 생성
         Pageable pageable = PageRequest.of(page, size);
         
-        // 문자열 날짜를 LocalDate로 변환
-        LocalDate startLocalDate = LocalDate.parse(startDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        LocalDate endLocalDate = LocalDate.parse(endDate, DateTimeFormatter.ofPattern("yyyy-MM-dd"));
-        
+        // 날짜를 직접 String으로 전달 (LocalDate 변환 제거)
         if (orderId != null && !orderId.trim().isEmpty()) {
             // 주문번호 포함 검색 + 날짜 범위 + 페이징
             return orderItemRepository.findByOrderIdContainingAndPaymentAtBetweenWithPaging(
-                    orderId.trim(), startLocalDate, endLocalDate, pageable);
+                    orderId.trim(), startDate, endDate, pageable);
         } else {
             // 날짜 범위만 + 페이징
-            return orderItemRepository.findByPaymentAtBetweenWithPaging(startLocalDate, endLocalDate, pageable);
+            return orderItemRepository.findByPaymentAtBetweenWithPaging(startDate, endDate, pageable);
         }
     }
     
-    //OrderItem을 AdminOrderListRespDto로 변환 (상품목록조회용)
+    // 기존 DTO 변환 메서드 - 완전 그대로 유지
     private AdminOrderListRespDto convertToAdminOrderDto(OrderItem orderItem) {
         try {
             // 주문 상세 정보 조회
@@ -134,6 +205,35 @@ public class AdminOrderService {
             return null;
         }
     }
+    
+    // 새로운 DTO 변환 메서드 - 전화번호 포함
+    private AdminOrderListRespDto convertToAdminOrderDtoWithPhone(OrderItem orderItem) {
+        try {
+            // 주문 상세 정보 조회
+            List<AdminOrderListRespDto.OrderDetailDto> orderDetails = 
+                    getOrderDetailsByOrderId(orderItem.getOrderId());
+            
+            return AdminOrderListRespDto.builder()
+                    .orderId(orderItem.getOrderId())
+                    .userCode(orderItem.getUserCode())
+                    .receivedUserName(orderItem.getReceivedUserName())
+                    .receivedUserPhone(orderItem.getReceivedUserPhone())  // 새로 추가
+                    .finalPrice(orderItem.getFinalPrice())
+                    .deliveryStatus(orderItem.getDeliveryStatus())
+                    .deliveryCom(orderItem.getDeliveryCom())
+                    .invoiceNum(orderItem.getInvoiceNum())
+                    .changeState(orderItem.getChangeState())
+                    .paymentAt(orderItem.getPaymentAt())
+                    .orderDetails(orderDetails)
+                    .build();
+                    
+        } catch (Exception e) {
+            log.error("주문 DTO 변환 실패 (전화번호포함) - orderId: {}, error: {}", orderItem.getOrderId(), e.getMessage());
+            return null;
+        }
+    }
+    
+    // 나머지 모든 기존 메서드들은 완전 그대로 유지
     
     // 주문 상세 정보 조회 (상품목록조회용)
     private List<AdminOrderListRespDto.OrderDetailDto> getOrderDetailsByOrderId(Integer orderId) {
@@ -372,7 +472,7 @@ public class AdminOrderService {
                     .build();
                     
         } catch (Exception e) {
-            log.error("배송 정보 업데이트 실패 - orderId: {}, userCode: {}, error: {}", 
+            log.error("배송 정보 업데이트 실패 - orderId: {}, userCode: {}, error: {}",
                     reqDto.getOrderId(), reqDto.getUserCode(), e.getMessage(), e);
             return RespDto.<Boolean>builder()
                     .code(-1)
